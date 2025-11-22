@@ -24,6 +24,7 @@ services:
       MONGODB_URI: mongodb://mongodb:27017/pmp?serverSelectionTimeoutMs=15000&connectTimeoutMS=15000
       GELF_HOST: graylog
       GELF_PORT: 12201
+      SECRET_KEY: "api-auth!A$9zLq#2vNf@eR6tYpWmZcXbGdQh"
 
   mongodb:
     image: mongo:6

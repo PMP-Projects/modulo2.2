@@ -1,6 +1,7 @@
 package br.com.fatec.modulo2_1.repository;
 
 import br.com.fatec.modulo2_1.entity.Usuario;
+import br.com.fatec.modulo2_1.execption.UsuarioPersistenceException;
 import br.com.fatec.modulo2_1.repository.adapter.UsuarioRepositoryImplAdapter;
 import br.com.fatec.modulo2_1.repository.client.UsuarioRepositoryWithMongodb;
 import br.com.fatec.modulo2_1.repository.orm.UsuarioOrm;
@@ -13,12 +14,11 @@ import java.util.Optional;
 
 @Repository
 public class UsuarioRepositoryImpl implements UsuarioRepository {
+
     private final PasswordEncoder encoder;
     private final UsuarioRepositoryWithMongodb repository;
 
-    public UsuarioRepositoryImpl(
-            PasswordEncoder encoder,
-            UsuarioRepositoryWithMongodb repository) {
+    public UsuarioRepositoryImpl(PasswordEncoder encoder, UsuarioRepositoryWithMongodb repository) {
         this.encoder = encoder;
         this.repository = repository;
     }
@@ -28,17 +28,18 @@ public class UsuarioRepositoryImpl implements UsuarioRepository {
         try {
             Optional<UsuarioOrm> exists = repository.findByUsername(usuario.username());
             if (exists.isPresent()) {
-                throw new RuntimeException("Username já existe");
+                throw new DuplicateKeyException("Username já existe");
             }
 
             String encoded = encoder.encode(usuario.password());
             UsuarioOrm orm = UsuarioRepositoryImplAdapter.toOrm(usuario, encoded);
             UsuarioOrm saved = repository.save(orm);
+
             return UsuarioRepositoryImplAdapter.toDomain(saved);
         } catch (DuplicateKeyException ex) {
-            throw new RuntimeException("Username já existe", ex);
+            throw ex;
         } catch (Exception ex) {
-            throw new RuntimeException(ex);
+            throw new UsuarioPersistenceException("Erro ao salvar usuário", ex);
         }
     }
 
@@ -47,13 +48,14 @@ public class UsuarioRepositoryImpl implements UsuarioRepository {
         try {
             Optional<UsuarioOrm> optional = repository.findByUsername(username);
             if (optional.isEmpty()) {
-                throw new UsernameNotFoundException("Usuario não encontrado");
+                throw new UsernameNotFoundException("Credenciais inválidas");
             }
+
             return UsuarioRepositoryImplAdapter.toDomain(optional.get());
         } catch (UsernameNotFoundException ex) {
             throw ex;
         } catch (Exception ex) {
-            throw new RuntimeException(ex);
+            throw new UsuarioPersistenceException("Erro ao buscar usuário", ex);
         }
     }
 }
