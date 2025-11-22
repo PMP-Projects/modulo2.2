@@ -1,0 +1,23 @@
+<configuration>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %X{traceId:-} %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- GELF UDP appender -->
+    <appender name="GELF" class="de.siegmar.logbackgelf.GelfUdpAppender">
+        <graylogHost>${GELF_HOST}</graylogHost>
+        <graylogPort>${GELF_PORT}</graylogPort>
+        <facility>pessoa-api</facility>
+        <includeRawMessage>true</includeRawMessage>
+        <includeMdcData>true</includeMdcData>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="GELF"/>
+    </root>
+
+</configuration>
