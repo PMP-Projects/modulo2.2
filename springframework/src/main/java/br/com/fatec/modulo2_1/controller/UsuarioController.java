@@ -26,16 +26,4 @@ public class UsuarioController {
         Usuario saved = repository.save(UsuarioControllerAdapter.toDomain(request));
         return new UsuarioResponse(saved.id(), saved.username());
     }
-
-    /**
-     * endpoint para testar autenticação. Retorna o username do token.
-     */
-    @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/me")
-    public UsuarioResponse me(@AuthenticationPrincipal UserDetails userDetails) {
-        if (userDetails == null) {
-            return new UsuarioResponse(null, null);
-        }
-        return new UsuarioResponse(null, userDetails.getUsername());
-    }
 }
